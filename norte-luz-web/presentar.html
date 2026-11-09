@@ -41,6 +41,7 @@ header{display:flex;align-items:center;gap:20px;flex-wrap:wrap}
 .dot:focus-visible,button:focus-visible,a:focus-visible{outline:3px solid var(--amber);outline-offset:2px}
 .tools{display:flex;gap:8px}
 .btn{font:600 14px var(--f-body);border:1px solid var(--line);background:var(--surface);color:var(--ink);padding:9px 14px;border-radius:8px;cursor:pointer;text-decoration:none;display:inline-flex;align-items:center;gap:6px}
+.btn:disabled{opacity:.35;cursor:default}
 .btn.primary{background:var(--amber);border-color:var(--amber);color:#0b2440}
 .btn[aria-pressed="true"]{background:var(--navy);color:var(--bg);border-color:var(--navy)}
 main{flex:1;min-height:0;display:grid;grid-template-columns:minmax(0,5fr) minmax(0,8fr);gap:32px;align-items:center}
@@ -60,6 +61,8 @@ h1{font-family:var(--f-display);font-weight:700;font-size:clamp(28px,3.2vw,48px)
 .cover{grid-column:1/-1;display:flex;flex-direction:column;gap:22px;max-width:980px}
 .cover h1{font-size:clamp(40px,6vw,88px);font-weight:800}
 .cover p.lead{font-size:clamp(18px,1.6vw,24px);color:var(--muted);max-width:44ch}
+.cover.thanks{align-self:center;justify-self:center;align-items:center;text-align:center;max-width:none;width:100%}
+.cover.thanks h1{font-size:clamp(56px,10vw,160px);color:var(--navy)}
 .acts3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}
 .acts3 div{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:16px}
 .acts3 b{font-family:var(--f-display);color:var(--navy);font-size:18px;display:block}
@@ -161,7 +164,9 @@ const STEPS = [
   figs:[['1,60 → 1,48 M€','TOTEX a 5 años'],['32,5 %','refuerzos evitados para amortizarla']],
   notes:'Cerramos con el dinero. El plan va en tres fases hasta 2035: 160.000 euros en gestión urgente, 320.000 en refuerzos agrupados por barrio y 480.000 en nuevos desarrollos. Y el TOTEX a cinco años: sin herramienta, 1,6 millones en refuerzos; con herramienta, evitando el 40 %, 1,48 millones, incluidos sensores, modelo y operación. Se paga sola a partir de evitar un 32,5 % de los refuerzos.'},
  {id:'cierre', act:4, cover:true, closing:true,
-  notes:'Para cerrar: el Mapa vivo le da al planificador tres respuestas. Dónde: qué centro se va a saturar. Cuándo: en qué año y a qué hora. Y qué hacer: la opción más barata, primero sin obra. El siguiente paso es un piloto en un barrio de Bilbao con datos reales de contadores. Invertir antes de que la red se sature, no después. Gracias.'}
+  notes:'Para cerrar: el Mapa vivo le da al planificador tres respuestas. Dónde: qué centro se va a saturar. Cuándo: en qué año y a qué hora. Y qué hacer: la opción más barata, primero sin obra. El siguiente paso es un piloto en un barrio de Bilbao con datos reales de contadores. Invertir antes de que la red se sature, no después.'},
+ {id:'gracias', act:4, cover:true, thanks:true,
+  notes:'Muchas gracias. Quedamos a vuestra disposición para cualquier pregunta.'}
 ];
 const ACTS = ['', 'España', 'La ciudad', 'Bilbao', ''];
 let i = 0, showNotes = false;
@@ -186,7 +191,11 @@ function buildRail(){
 function render(){
   const s = STEPS[i], st = $('stage');
   st.classList.remove('stage'); void st.offsetWidth; st.classList.add('stage');
-  if (s.cover && !s.closing){
+  if (s.thanks){
+    st.innerHTML = '<div class="cover thanks"><p class="eyebrow">Reto i-DE · MDIT Deusto · Equipo e-Voltaria</p>' +
+      '<h1>Muchas gracias</h1>' +
+      '<p class="lead">¿Preguntas?</p></div>';
+  } else if (s.cover && !s.closing){
     st.innerHTML = '<div class="cover"><p class="eyebrow">Reto i-DE · MDIT Deusto · Equipo e-Voltaria</p>' +
       '<h1>Mapa vivo de Norte Luz</h1>' +
       '<p class="lead">Dónde y cuándo crecerá la demanda del coche eléctrico, y qué hacer antes de que la red se sature.</p>' +
@@ -215,7 +224,7 @@ function render(){
     if (k === i) d.setAttribute('aria-current','step'); else d.removeAttribute('aria-current');
     d.classList.toggle('done', k < i); });
   $('prev').disabled = i === 0; $('next').disabled = i === STEPS.length - 1;
-  if (location.hash.slice(1) !== s.id) history.replaceState(null, '', '#' + s.id);
+  if (location.hash.slice(1) !== s.id) { try { history.replaceState(null, '', '#' + s.id); } catch (e) { try { location.hash = s.id; } catch (e2) {} } }
   try { localStorage.setItem('nlPaso', s.id); } catch(e) {}
 }
 function go(k){ i = Math.max(0, Math.min(STEPS.length - 1, k)); render(); }
