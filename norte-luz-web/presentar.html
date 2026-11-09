@@ -1,0 +1,242 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Presentar Mapa vivo Norte Luz</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@600;700;800&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@500&display=swap">
+<style>
+/* Layout: one presenter stage per step — text column left, live-looking screenshot right, a three-act rail on top */
+:root{
+  --bg:#f4f7fb; --surface:#ffffff; --ink:#122a44; --muted:#4f6075; --line:#d7e0ea;
+  --navy:#0b3d6e; --green:#2e7a16; --green-soft:#e6f2df; --amber:#f2b705; --amber-ink:#5a4300;
+  --shot-bg:#ffffff; --notes-bg:#0b3d6e; --notes-ink:#eaf2fb;
+  --f-display:'Poppins', 'Segoe UI', Arial, sans-serif;
+  --f-body:'Inter', 'Segoe UI', Arial, sans-serif;
+  --f-mono:'IBM Plex Mono', ui-monospace, Menlo, monospace;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#0c1724; --surface:#132235; --ink:#e8eff7; --muted:#a6b6c8; --line:#25384f;
+  --navy:#8fc1f2; --green:#7cc85c; --green-soft:#1c3320; --amber:#f2b705; --amber-ink:#f6d36b;
+  --shot-bg:#0f1c2b; --notes-bg:#071220; --notes-ink:#dbe8f5; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0c1724; --surface:#132235; --ink:#e8eff7; --muted:#a6b6c8; --line:#25384f;
+  --navy:#8fc1f2; --green:#7cc85c; --green-soft:#1c3320; --amber:#f2b705; --amber-ink:#f6d36b;
+  --shot-bg:#0f1c2b; --notes-bg:#071220; --notes-ink:#dbe8f5; color-scheme:dark}
+html,body{height:100%}
+body{background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:16px;line-height:1.5;
+  padding-left:max(16px, env(safe-area-inset-left, 0px));padding-right:max(16px, env(safe-area-inset-right, 0px));
+  display:flex;flex-direction:column;}
+.wrap{max-width:1440px;width:100%;margin-inline:auto;display:flex;flex-direction:column;gap:20px;flex:1;padding-block:20px;min-height:0}
+header{display:flex;align-items:center;gap:20px;flex-wrap:wrap}
+.brand{font-family:var(--f-display);font-weight:800;font-size:20px;color:var(--navy);letter-spacing:.02em;display:flex;align-items:center;gap:10px}
+.brand i{display:inline-block;width:10px;height:28px;background:linear-gradient(var(--amber) 0 35%, #4ca82b 35%);border-radius:2px}
+.rail{display:flex;gap:6px;flex:1;min-width:0;flex-wrap:wrap}
+.act{display:flex;flex-direction:column;gap:6px;min-width:0}
+.act span{font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);font-weight:600}
+.act div{display:flex;gap:4px}
+.dot{border:0;cursor:pointer;height:8px;width:36px;border-radius:4px;background:var(--line);padding:0}
+.dot[aria-current="step"]{background:var(--amber)}
+.dot.done{background:#4ca82b}
+.dot:focus-visible,button:focus-visible,a:focus-visible{outline:3px solid var(--amber);outline-offset:2px}
+.tools{display:flex;gap:8px}
+.btn{font:600 14px var(--f-body);border:1px solid var(--line);background:var(--surface);color:var(--ink);padding:9px 14px;border-radius:8px;cursor:pointer;text-decoration:none;display:inline-flex;align-items:center;gap:6px}
+.btn.primary{background:var(--amber);border-color:var(--amber);color:#0b2440}
+.btn[aria-pressed="true"]{background:var(--navy);color:var(--bg);border-color:var(--navy)}
+main{flex:1;min-height:0;display:grid;grid-template-columns:minmax(0,5fr) minmax(0,8fr);gap:32px;align-items:center}
+.text{display:flex;flex-direction:column;gap:18px;min-width:0}
+.eyebrow{font:600 13px var(--f-body);letter-spacing:.14em;text-transform:uppercase;color:var(--green)}
+h1{font-family:var(--f-display);font-weight:700;font-size:clamp(28px,3.2vw,48px);line-height:1.1;color:var(--navy);text-wrap:balance}
+.block h2{font:600 15px var(--f-body);color:var(--ink);margin-bottom:4px}
+.block p{color:var(--muted);font-size:clamp(16px,1.25vw,19px);max-width:52ch}
+.demo{background:var(--green-soft);border-radius:10px;padding:14px 16px;font-size:clamp(15px,1.15vw,18px);color:var(--ink)}
+.demo b{color:var(--green)}
+.figs{display:flex;gap:12px;flex-wrap:wrap}
+.fig{border-left:3px solid var(--amber);padding:2px 0 2px 12px}
+.fig strong{display:block;font-family:var(--f-mono);font-size:clamp(20px,1.8vw,28px);color:var(--navy);font-variant-numeric:tabular-nums}
+.fig small{color:var(--muted);font-size:13px}
+.shot{min-width:0;background:var(--shot-bg);border:1px solid var(--line);border-radius:14px;overflow:hidden;box-shadow:0 10px 30px rgba(11,61,110,.12);aspect-ratio:16/10;max-width:100%}
+.shot img{width:100%;height:100%;object-fit:contain;display:block}
+.cover{grid-column:1/-1;display:flex;flex-direction:column;gap:22px;max-width:980px}
+.cover h1{font-size:clamp(40px,6vw,88px);font-weight:800}
+.cover p.lead{font-size:clamp(18px,1.6vw,24px);color:var(--muted);max-width:44ch}
+.acts3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}
+.acts3 div{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:16px}
+.acts3 b{font-family:var(--f-display);color:var(--navy);font-size:18px;display:block}
+.acts3 span{color:var(--muted);font-size:14px}
+footer{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.count{font-family:var(--f-mono);color:var(--muted);font-size:14px;margin-right:auto}
+.keys{color:var(--muted);font-size:13px}
+.notes{background:var(--notes-bg);color:var(--notes-ink);border-radius:12px;padding:16px 20px;font-size:17px;line-height:1.55;max-height:30vh;overflow:auto}
+.notes span{display:block;font:600 11px var(--f-body);letter-spacing:.14em;text-transform:uppercase;color:var(--amber);margin-bottom:6px}
+.stage{animation:in .35s ease both}
+@keyframes in{from{opacity:.4;transform:translateY(6px)}to{opacity:1;transform:none}}
+@media (prefers-reduced-motion: reduce){.stage{animation:none}}
+@media (max-width:860px){
+  html,body{height:auto}
+  main{grid-template-columns:1fr}
+  .acts3{grid-template-columns:1fr}
+  .dot{width:22px}
+  .keys{display:none}
+}
+</style>
+</head>
+<body>
+
+
+<div class="wrap">
+  <header>
+    <div class="brand"><i aria-hidden="true"></i>NORTE LUZ</div>
+    <nav class="rail" id="rail" aria-label="Pasos de la presentación"></nav>
+    <div class="tools">
+      <button class="btn" id="btnNotas" aria-pressed="false" title="Mostrar el guion (tecla N)">Guion</button>
+      <button class="btn" id="btnFull" title="Pantalla completa (tecla F)">Pantalla completa</button>
+      <a class="btn primary" id="btnProto" href="Planificador.html" target="_blank" rel="noopener">Abrir prototipo ↗</a>
+    </div>
+  </header>
+
+  <main id="stage" class="stage" aria-live="polite"></main>
+
+  <div class="notes" id="notes" hidden><span>Guion</span><div id="notesTxt"></div></div>
+
+  <footer>
+    <span class="count" id="count"></span>
+    <span class="keys">← → para avanzar · N guion · F pantalla completa</span>
+    <button class="btn" id="prev">← Anterior</button>
+    <button class="btn primary" id="next">Siguiente →</button>
+  </footer>
+</div>
+
+<script>
+const PROTO = 'Planificador.html';
+const STEPS = [
+ {id:'inicio', act:0, cover:true,
+  notes:'Buenos días. Somos e-Voltaria y os vamos a enseñar el Mapa vivo de Norte Luz, la herramienta que proponemos para que el planificador de la red sepa dónde y cuándo va a crecer la demanda del coche eléctrico, y qué hacer antes de que un centro se sature. Lo recorremos como un zoom: primero España, después una ciudad y por último Bilbao.'},
+ {id:'espana-2050', act:1, tab:'Pestaña 1 · España 2050', title:'España 2050: sin actuar frente a actuar', img:'img/t0.jpg',
+  que:'Las 52 provincias en semáforo, año a año hasta 2050, en dos mapas: si seguimos como hoy y con acciones.',
+  para:'Ver el coste de no hacer nada y probar escenarios con cuatro barras: coches eléctricos, horario de carga, electrolineras y demanda.',
+  demo:'pulsar ▶ y activar las acciones.',
+  figs:[['6 → 0','provincias en rojo en 2035'],['721 MW','que faltan sin actuar']],
+  notes:'Aquí vemos las 52 provincias en semáforo, de 2026 a 2050. A la izquierda, la red si seguimos como hoy: en 2035 hay 6 provincias en rojo y faltan unos 721 megavatios en hora punta. A la derecha, la misma red con las acciones de Norte Luz: gestión de la recarga, cargadores en zonas verdes, flexibilidad y refuerzos priorizados. Ninguna provincia en rojo. Con las barras jugamos con el ritmo de coches eléctricos, hasta el objetivo del PNIEC, con cuánta gente carga de madrugada, con las electrolineras y con el resto de la demanda.'},
+ {id:'espana-hoy', act:1, tab:'Pestaña 2 · España: red real hoy', title:'España hoy: la red real de i-DE', img:'img/t0b.jpg',
+  que:'Cada subestación de i-DE con la capacidad que le queda para nueva demanda, con datos públicos reales.',
+  para:'Demostrar que el problema ya existe hoy, antes de cualquier predicción.',
+  demo:'clic en una subestación de Bizkaia para ver sus megavatios libres.',
+  figs:[['94,8 %','de nudos sin capacidad firme'],['2.002 MW','libres de 43.841 ocupados']],
+  notes:'Esto no es una predicción: es la foto de hoy, con los datos públicos de capacidad de acceso de i-DE. De 3.019 nudos, 2.863 ya no tienen capacidad firme para nueva demanda: el 94,8 %. Cada punto es una subestación: verde si le quedan 5 megavatios o más, amarillo si menos, rojo si nada. Por eso decimos que el cuello de botella no es el coche, es la red.'},
+ {id:'mapa-red', act:2, tab:'Pestaña 3 · Mapa de la red', title:'Mapa vivo de la red urbana', img:'img/t1.jpg',
+  que:'120 centros de transformación en semáforo, barrio a barrio, para el año y el escenario que elijas.',
+  para:'Saber qué centros se saturan primero y cuántos coches eléctricos hay detrás, aunque no se hayan declarado.',
+  demo:'mover el año a 2032 y abrir el CT-0417.',
+  figs:[['9','centros saturados en 2030'],['2.739','coches detectados por contadores']],
+  notes:'Bajamos a una ciudad. Esta es la pantalla principal del planificador: 120 centros de transformación en nueve barrios, cada uno en verde, amarillo o rojo según la carga que tendrá. Elegimos el año y el escenario. En 2030, escenario medio, 9 centros están saturados y 65 hay que vigilarlos. Los contadores inteligentes nos dejan detectar 2.739 coches eléctricos, también los que nadie ha declarado: los coches invisibles. Vamos a abrir el CT-0417.'},
+ {id:'ficha', act:2, tab:'Pestaña 4 · Ficha de centro', title:'Ficha de un centro de transformación', img:'img/t2.jpg',
+  que:'Un centro en detalle: su carga hoy, el año en que se satura y su curva de carga hora a hora.',
+  para:'Responder «cuándo» y «a qué hora»: el pico de las 20:00 es el problema, no el día entero.',
+  demo:'cambiar de año y pulsar «Abrir optimizador».',
+  figs:[['2032','año en que se satura'],['408 → 264 kVA','punta con recarga en valle']],
+  notes:'Es la ficha del CT-0417, un centro de 400 kVA. Hoy va al 75 %, pero en 2032 llegará a 408 kVA: el 102 % de su potencia. Lo interesante es la curva: el problema es el pico de las ocho de la tarde, cuando todos llegan a casa y enchufan el coche. Si esa recarga se mueve a la madrugada, la punta baja a 264 kVA. Por eso la herramienta recomienda primero gestionar la carga y reforzar solo como último recurso.'},
+ {id:'optimizador', act:2, tab:'Pestaña 5 · Optimizador', title:'Optimizador: de rojo a verde', img:'img/t3.jpg',
+  que:'Las acciones posibles para un centro, de la más barata a la más cara, con su efecto y su coste.',
+  para:'Sacar un centro del rojo sin obra, en lugar de reforzarlo.',
+  demo:'marcar «recarga en valle» y «reequilibrar fases».',
+  figs:[['102 % → 78 %','carga del centro'],['2.100 €','frente a 20.000 € del refuerzo']],
+  notes:'El optimizador ordena las acciones de la más barata a la más cara. Mover la recarga al periodo valle quita 80 kVA por unos 1.500 euros. Reequilibrar las fases quita otros 18 por 600 euros, sin obra. Con esas dos, el centro pasa del 102 % al 78 %. Coste: 2.100 euros y de uno a tres meses. Reforzarlo costaría 20.000. Casi 18.000 euros de ahorro en un solo centro.'},
+ {id:'bilbao', act:3, tab:'Pestaña 6 · Nuevo centro', title:'Bilbao: dónde poner centros y hubs', img:'img/t4.jpg',
+  que:'Bilbao y Bizkaia con calles, subestaciones y transformadores reales, la red de baja tensión y su mapa de calor.',
+  para:'Arrastrar centros nuevos o hubs de recarga, o dejar que un modelo matemático elija dónde ponerlos.',
+  demo:'«Toda la ciudad» → «Plan óptimo (MILP)» → «Sugerir dónde poner un hub».',
+  figs:[['6 + 17','centros nuevos y refuerzos'],['575.852 €','plan óptimo de la ciudad']],
+  notes:'Esta es la pestaña más potente. Es Bilbao de verdad: las calles, las subestaciones de i-DE y los transformadores de OpenStreetMap son reales; las cargas de cada centro son simuladas. Se pueden arrastrar centros nuevos, que alivian a sus vecinos, o hubs de recarga, y la red se recalcula al momento. Con «Plan óptimo», un modelo de optimización matemática decide dónde poner centros nuevos y qué reforzar al menor coste: para toda la ciudad, 6 centros nuevos y 17 refuerzos por unos 576.000 euros. Y «Sugerir dónde poner un hub» busca el punto con más margen.'},
+ {id:'cargadores', act:3, tab:'Pestaña 7 · Cargadores y simulador', title:'Dónde caben nuevos cargadores', img:'img/t5.jpg',
+  que:'Dónde cabe un cargador de 7,4, 22, 50 o 150 kW, ordenado por el margen libre de cada centro.',
+  para:'Responder antes de que llegue la solicitud: «¿qué pasa si se conecta aquí?».',
+  demo:'elegir 150 kW y un centro, y ver si queda en verde o saturado.',
+  figs:[['67 % → 90 %','CT-0506 con 150 kW'],['210 kVA','margen en el mejor centro']],
+  notes:'Aquí está la otra cara: no solo dónde se satura la red, sino dónde sí caben cargadores. Elegimos la potencia, por ejemplo 150 kW para un punto público, y la herramienta ordena los centros por margen libre. A la derecha, el simulador: si conecto 150 kW en el CT-0506, pasa del 67 % al 90 % y queda saturado. Antes de que llegue la solicitud ya sabemos la respuesta.'},
+ {id:'inversiones', act:3, tab:'Pestaña 8 · Inversiones y CO₂', title:'Inversiones, TOTEX y CO₂', img:'img/t6.jpg',
+  que:'El plan por fases hasta 2035, el ranking de centros por urgencia y el ahorro frente a no tener herramienta.',
+  para:'Justificar la inversión ante la dirección y el regulador, con euros y toneladas de CO₂.',
+  demo:'mover la barra de refuerzos evitados.',
+  figs:[['1,60 → 1,48 M€','TOTEX a 5 años'],['32,5 %','refuerzos evitados para amortizarla']],
+  notes:'Cerramos con el dinero. El plan va en tres fases hasta 2035: 160.000 euros en gestión urgente, 320.000 en refuerzos agrupados por barrio y 480.000 en nuevos desarrollos. Y el TOTEX a cinco años: sin herramienta, 1,6 millones en refuerzos; con herramienta, evitando el 40 %, 1,48 millones, incluidos sensores, modelo y operación. Se paga sola a partir de evitar un 32,5 % de los refuerzos.'},
+ {id:'cierre', act:4, cover:true, closing:true,
+  notes:'Para cerrar: el Mapa vivo le da al planificador tres respuestas. Dónde: qué centro se va a saturar. Cuándo: en qué año y a qué hora. Y qué hacer: la opción más barata, primero sin obra. El siguiente paso es un piloto en un barrio de Bilbao con datos reales de contadores. Invertir antes de que la red se sature, no después. Gracias.'}
+];
+const ACTS = ['', 'España', 'La ciudad', 'Bilbao', ''];
+let i = 0, showNotes = false;
+const $ = (id) => document.getElementById(id);
+const esc = (s) => s.replace(/&/g,'&amp;').replace(/</g,'&lt;');
+
+function buildRail(){
+  const r = $('rail'); r.innerHTML = '';
+  const groups = [[0,'Inicio'],[1,'España'],[2,'La ciudad'],[3,'Bilbao'],[4,'Cierre']];
+  groups.forEach(([a,label]) => {
+    const g = document.createElement('div'); g.className = 'act';
+    g.innerHTML = '<span>' + label + '</span><div></div>';
+    STEPS.forEach((s, k) => { if (s.act !== a) return;
+      const b = document.createElement('button'); b.className = 'dot'; b.dataset.k = k;
+      b.setAttribute('aria-label', (s.tab || label));
+      b.addEventListener('click', () => go(k));
+      g.lastChild.appendChild(b); });
+    r.appendChild(g);
+  });
+}
+
+function render(){
+  const s = STEPS[i], st = $('stage');
+  st.classList.remove('stage'); void st.offsetWidth; st.classList.add('stage');
+  if (s.cover && !s.closing){
+    st.innerHTML = '<div class="cover"><p class="eyebrow">Reto i-DE · MDIT Deusto · Equipo e-Voltaria</p>' +
+      '<h1>Mapa vivo de Norte Luz</h1>' +
+      '<p class="lead">Dónde y cuándo crecerá la demanda del coche eléctrico, y qué hacer antes de que la red se sature.</p>' +
+      '<div class="acts3"><div><b>1 · España</b><span>El tamaño del problema: dónde falta red hoy y hasta 2050.</span></div>' +
+      '<div><b>2 · La ciudad</b><span>Diagnóstico centro a centro y cómo pasar de rojo a verde sin obra.</span></div>' +
+      '<div><b>3 · Bilbao</b><span>Dónde poner centros, hubs y cargadores, y cuánto cuesta.</span></div></div></div>';
+  } else if (s.closing){
+    st.innerHTML = '<div class="cover"><p class="eyebrow">Conclusión</p>' +
+      '<h1>Invertir antes de que la red se sature, no después.</h1>' +
+      '<div class="acts3"><div><b>Dónde</b><span>Qué centro de transformación se satura.</span></div>' +
+      '<div><b>Cuándo</b><span>En qué año y a qué hora del día.</span></div>' +
+      '<div><b>Qué hacer</b><span>La opción más barata: primero sin obra, reforzar al final.</span></div></div>' +
+      '<p class="lead">Siguiente paso: un piloto en un barrio de Bilbao con datos reales de contadores.</p>' +
+      '<p><a class="btn primary" href="' + PROTO + '" target="_blank" rel="noopener">Abrir prototipo ↗</a></p></div>';
+  } else {
+    st.innerHTML = '<div class="text"><p class="eyebrow">' + esc(s.tab) + '</p><h1>' + esc(s.title) + '</h1>' +
+      '<div class="block"><h2>Qué muestra</h2><p>' + esc(s.que) + '</p></div>' +
+      '<div class="block"><h2>Para qué sirve</h2><p>' + esc(s.para) + '</p></div>' +
+      '<div class="figs">' + s.figs.map(f => '<div class="fig"><strong>' + esc(f[0]) + '</strong><small>' + esc(f[1]) + '</small></div>').join('') + '</div>' +
+      '<p class="demo"><b>En la demo:</b> ' + esc(s.demo) + '</p></div>' +
+      '<a class="shot" href="' + PROTO + '" target="_blank" rel="noopener" title="Abrir esta pestaña en el prototipo"><img src="' + s.img + '" alt="Captura de la pestaña ' + esc(s.title) + ' del prototipo"></a>';
+  }
+  $('notesTxt').textContent = s.notes;
+  $('count').textContent = String(i + 1).padStart(2,'0') + ' / ' + String(STEPS.length).padStart(2,'0');
+  document.querySelectorAll('.dot').forEach(d => { const k = +d.dataset.k;
+    if (k === i) d.setAttribute('aria-current','step'); else d.removeAttribute('aria-current');
+    d.classList.toggle('done', k < i); });
+  $('prev').disabled = i === 0; $('next').disabled = i === STEPS.length - 1;
+  if (location.hash.slice(1) !== s.id) history.replaceState(null, '', '#' + s.id);
+  try { localStorage.setItem('nlPaso', s.id); } catch(e) {}
+}
+function go(k){ i = Math.max(0, Math.min(STEPS.length - 1, k)); render(); }
+function fromHash(){ const h = location.hash.slice(1); const k = STEPS.findIndex(s => s.id === h); if (k >= 0 && k !== i){ i = k; render(); } }
+
+$('prev').onclick = () => go(i - 1);
+$('next').onclick = () => go(i + 1);
+$('btnNotas').onclick = () => { showNotes = !showNotes; $('notes').hidden = !showNotes; $('btnNotas').setAttribute('aria-pressed', String(showNotes)); };
+$('btnFull').onclick = () => { const el = document.documentElement;
+  try { if (document.fullscreenElement) document.exitFullscreen(); else if (el.requestFullscreen) el.requestFullscreen().catch(()=>{}); } catch(e) {} };
+document.addEventListener('keydown', (e) => {
+  if (e.target.closest && e.target.closest('input,textarea')) return;
+  if (e.key === 'ArrowRight' || e.key === 'PageDown' || e.key === ' ') { e.preventDefault(); go(i + 1); }
+  else if (e.key === 'ArrowLeft' || e.key === 'PageUp') { e.preventDefault(); go(i - 1); }
+  else if (e.key === 'n' || e.key === 'N') $('btnNotas').click();
+  else if (e.key === 'f' || e.key === 'F') $('btnFull').click();
+});
+window.addEventListener('hashchange', fromHash);
+buildRail();
+(function start(){ const h = location.hash.slice(1); const k = STEPS.findIndex(s => s.id === h); i = k >= 0 ? k : 0; render(); })();
+</script>
+
+</body>
+</html>
